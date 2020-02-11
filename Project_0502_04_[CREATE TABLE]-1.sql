@@ -1,0 +1,80 @@
+USE BUDT758_DB_0502_04
+		
+CREATE TABLE [EV.Driver](
+	dId VARCHAR(10) NOT NULL,
+	dPermit VARCHAR(15),
+	dFname VARCHAR(15),
+	dLname VARCHAR(15)	
+	CONSTRAINT pk_Driver_dId PRIMARY KEY (dId))
+	
+CREATE TABLE [EV.Station](
+	sId VARCHAR(10) NOT NULL,
+	sLocation VARCHAR(30),
+	CONSTRAINT pk_Station_sId PRIMARY KEY(sId))
+	
+CREATE TABLE [EV.Permit](
+perId VARCHAR(10) NOT NULL,
+perType VARCHAR(10),
+perSpace VARCHAR(10)
+CONSTRAINT pk_Permit_pId PRIMARY KEY(perId))
+
+CREATE TABLE [EV.Rate](
+	rVehicleCategory CHAR(20) NOT NULL,
+	rAmount NUMERIC(6,2),
+	CONSTRAINT pk_Rate_rVehicleCategory PRIMARY KEY(rVehicleCategory))
+	
+CREATE TABLE [EV.Vehicle](
+	vId VARCHAR(10) NOT NULL, 
+	rVehicleCategory CHAR(20), 
+	vMake VARCHAR(20), 
+	vName VARCHAR(20)
+	CONSTRAINT pk_Vehicle_vId PRIMARY KEY (vId)
+	CONSTRAINT fk_Vehicle_rVehicleCategory FOREIGN KEY (rVehicleCategory)
+		REFERENCES [EV.Rate] (rVehicleCategory)
+		ON DELETE NO ACTION ON UPDATE NO ACTION )
+
+CREATE TABLE [EV.Access](
+	dId VARCHAR(10) NOT NULL,
+	vId VARCHAR(10) NOT NULL,
+	sId VARCHAR(10) NOT NULL,
+	aStartTime DateTime2,
+	aEndTime DateTime2
+	CONSTRAINT pk_Access_dId_vId_sId PRIMARY KEY(dId, vId, sId)
+	CONSTRAINT fk_Access_dId FOREIGN KEY (dId)
+		REFERENCES [EV.Driver] (dId)
+		ON DELETE NO ACTION ON UPDATE NO ACTION,
+	CONSTRAINT fk_Access_vId FOREIGN KEY (vId)
+		REFERENCES [EV.Vehicle] (vId)
+		ON DELETE NO ACTION ON UPDATE NO ACTION,
+	CONSTRAINT fk_Access_sId FOREIGN KEY (sId)
+		REFERENCES [EV.Station] (sId)
+		ON DELETE NO ACTION ON UPDATE NO ACTION)
+
+CREATE TABLE [EV.Pay](
+	pId VARCHAR(10) NOT NULL,
+	vId VARCHAR(10) NOT NULL, 
+	rVehicleCategory CHAR(20) NOT NULL,
+	dId VARCHAR(10) NOT NULL,
+	pType VARCHAR(15),
+	pAmount NUMERIC(6,2)
+	CONSTRAINT pk_Pay_pId_vId_rVehicleCategory_dId PRIMARY KEY(pId, vId, rVehicleCategory, dId)
+	CONSTRAINT fk_Pay_vId FOREIGN KEY (vId)
+		REFERENCES [EV.Vehicle] (vId)
+		ON DELETE NO ACTION ON UPDATE NO ACTION,
+	CONSTRAINT fk_Pay_rVehicleCategory FOREIGN KEY (rVehicleCategory)
+		REFERENCES [EV.Rate] (rVehicleCategory)
+		ON DELETE CASCADE ON UPDATE CASCADE,
+	CONSTRAINT fk_Pay_dId FOREIGN KEY (dId)
+		REFERENCES [EV.Driver] (dId)
+		ON DELETE NO ACTION ON UPDATE NO ACTION	)
+
+CREATE TABLE [EV.Possess](
+	dId VARCHAR(10) NOT NULL,
+	perId VARCHAR(10) NOT NULL
+	CONSTRAINT pk_Possess_dId_perId PRIMARY KEY(dId, perId)
+	CONSTRAINT fk_Possess_dId FOREIGN KEY (dId)
+		REFERENCES [EV.Driver] (dId)
+		ON DELETE CASCADE ON UPDATE CASCADE,
+	CONSTRAINT fk_Possess_perId FOREIGN KEY (perId)
+		REFERENCES [EV.Permit] (perId)
+		ON DELETE NO ACTION ON UPDATE NO ACTION	)
